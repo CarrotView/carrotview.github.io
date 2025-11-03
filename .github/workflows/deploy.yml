@@ -1,0 +1,48 @@
+# .github/workflows/deploy.yml
+
+name: Build and Deploy to GitHub Pages
+
+on:
+  # This runs the workflow on every push to your 'main' branch
+  push:
+    branches:
+      - main  # Or 'master', depending on your repo
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest  # Use a standard Linux runner
+    permissions:
+      contents: read
+      pages: write      # Allow the job to write to the Pages deployment
+      id-token: write   # Allow the job to authenticate
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'   # Use a current LTS version of Node.js
+          cache: 'npm'       # Speed up future builds by caching dependencies
+
+      - name: Install dependencies
+        run: npm ci  # 'npm ci' is a cleaner, faster install for servers
+
+      - name: Build the website
+        run: npm run dist  # 👈 This is your command! - Using dist for Vite
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # This is the folder your 'npm run build' command creates
+          # 🚨 **CHECK THIS PATH!** 🚨
+          # It might be 'build', 'dist', 'public', or something else.
+          path: './build' 
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

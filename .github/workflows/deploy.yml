@@ -34,7 +34,9 @@ jobs:
         run: npm ci # 'ci' is faster and safer for pipelines than 'install'
 
       - name: Build project
-        run: npm run build # Or whatever your build command is in package.json
+        run: |
+          npm run build # Or whatever your build command is in package.json
+          cp CNAME dist/CNAME # This ensures that GitHub knows the domain
 
       - name: Upload build artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,22 +1,35 @@
 
+# CarrotView 🥕
+
+> **Stop Watching. Start Knowing.**
+
+CarrotView is an AI-powered video intelligence platform that transforms how businesses monitor and analyze video footage. Using advanced computer vision and AI technology, we help organizations maintain compliance, ensure safety, track attendance, and resolve conflicts—all without the need to manually watch hours of video.
+
+## 🚀 What We Do
+
+- **Smart Safety & Compliance Monitoring**: Automatically detect safety violations and compliance issues in real-time
+- **Time Intelligence**: Save countless hours with instant AI video analysis—get insights in seconds, not days  
+- **Automated Attendance Tracking**: Accurate monitoring without manual checks for education, corporate, and events
+- **AI-Powered Conflict Resolution**: Quickly resolve disputes with objective, AI-analyzed evidence
+
+## 📊 Results That Matter
+
+- **95% Time Saved** on video review processes
+- **24/7 Monitoring** capabilities
+- **Real-time Detection** of critical events
+- **Objective Evidence** for dispute resolution
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/67c258a3-86aa-493c-a686-b2eaf45873b0
+**URL**: https://carrotview.com
 
 ## How can I edit this code?
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/67c258a3-86aa-493c-a686-b2eaf45873b0) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+This is being done through the GitHub 
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in the website.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -62,12 +75,5 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/67c258a3-86aa-493c-a686-b2eaf45873b0) and click on Share -> Publish.
+Simply open GitHub Actions in the repo and run a job.
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

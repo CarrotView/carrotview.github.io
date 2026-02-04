@@ -53,6 +53,9 @@ const UrlInput = ({ onSubmit, apiEndpoint = "http://localhost:5000/process" }: U
 
   return (
     <div className="w-full max-w-2xl">
+      <label className="block text-lg font-medium mb-3">
+        Please put in your company's URL
+      </label>
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

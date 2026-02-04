@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import heroImage from "@/assets/hero-image.jpg";
+import UrlInput from "@/components/UrlInput";
 
 const Hero = () => {
   return (
@@ -25,9 +25,14 @@ const Hero = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-xl">
-              CarrotView uses advanced computer vision and AI to analyze video footage instantly, 
+              !!!!!CarrotView uses advanced computer vision and AI to analyze video footage instantly, 
               helping you maintain compliance, ensure safety, and resolve conflicts—without watching hours of video.
             </p>
+            
+            <UrlInput 
+              apiEndpoint="http://localhost:5000/process"
+              onSubmit={(url) => console.log("URL submitted:", url)}
+            />
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-medium">
@@ -59,11 +64,9 @@ const Hero = () => {
           
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl rounded-full" />
-            <img 
-              src={heroImage} 
-              alt="AI Video Analysis Interface" 
-              className="relative rounded-2xl shadow-strong w-full h-auto"
-            />
+            <div className="relative rounded-2xl shadow-strong w-full h-64 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <span className="text-muted-foreground">Video Analysis Preview</span>
+            </div>
           </div>
         </div>
       </div>

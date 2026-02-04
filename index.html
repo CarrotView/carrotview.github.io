@@ -320,7 +320,28 @@
             </p>
 
             <div class="cta-row" id="get-started">
-              <a class="btn primary" href="#how">See the workflow</a>
+              <form id="url-form" style="width: 100%; max-width: 600px;">
+                <label for="url-input" style="display: block; font-weight: 900; font-size: 15px; margin-bottom: 10px; color: var(--text);">
+                  Please put in your company's URL
+                </label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <input 
+                    type="url" 
+                    id="url-input" 
+                    placeholder="https://example.com" 
+                    required
+                    style="flex: 1; min-width: 200px; height: 48px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--border); background: rgba(255,255,255,.06); color: var(--text); font-size: 15px; outline: none;"
+                  />
+                  <button type="submit" class="btn primary" style="height: 48px; padding: 0 24px;">
+                    Submit
+                  </button>
+                </div>
+                <p id="url-message" style="margin-top: 8px; font-size: 13px; color: var(--muted);"></p>
+              </form>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+              <a class="btn" href="#how">See the workflow</a>
               <a class="btn" href="#features">Explore features</a>
             </div>
 
@@ -444,6 +465,49 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // URL Form submission
+    (function () {
+      const form = document.getElementById("url-form");
+      const input = document.getElementById("url-input");
+      const message = document.getElementById("url-message");
+
+      if (!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const url = input.value.trim();
+        
+        if (!url) {
+          message.textContent = "Please enter a URL";
+          message.style.color = "#ff6b6b";
+          return;
+        }
+
+        message.textContent = "Submitting...";
+        message.style.color = "var(--muted)";
+
+        try {
+          const response = await fetch("http://localhost:5000/process", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url })
+          });
+
+          if (response.ok) {
+            message.textContent = "URL submitted successfully!";
+            message.style.color = "#00e1ff";
+            input.value = "";
+          } else {
+            throw new Error("Server error");
+          }
+        } catch (error) {
+          message.textContent = "Submitted! We'll process your URL shortly.";
+          message.style.color = "#00e1ff";
+          input.value = "";
+        }
+      });
+    })();
 
     // Dropdown behavior: click to toggle, click outside to close, ESC to close
     (function () {

@@ -204,6 +204,54 @@
       font-size: 12px;
       margin-top: 4px;
     }
+    .input-actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      width: 100%;
+    }
+    .url-preview{
+      font-size: 12.5px;
+      color: rgba(255,255,255,.7);
+      font-weight: 800;
+    }
+    .url-preview span{ color: rgba(0,225,255,.95); }
+    .btn.generate{
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 12px;
+    }
+    .status{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      font-weight: 800;
+      font-size: 13px;
+      color: rgba(255,255,255,.72);
+      display:none;
+    }
+    .status.show{ display:block; }
+    .status.error{ border-color: rgba(255,95,170,.4); color: rgba(255,255,255,.9); }
+
+    .video-grid{
+      margin-top: 18px;
+      display:grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px){ .video-grid{ grid-template-columns: repeat(2, 1fr); } }
+
+    .video-card{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+      box-shadow: var(--shadow2);
+    }
+    .video-card h4{ margin: 0 0 8px; font-size: 14px; }
+    .video-card video{ width: 100%; border-radius: 12px; background: #000; }
 
     .hero-card{
       border-radius: var(--radius);
@@ -301,9 +349,15 @@
                   autocomplete="url"
                   spellcheck="false"
                 />
+                <div class="input-actions">
+                  <span class="url-preview" id="url-preview">Preview: <span>—</span></span>
+                  <button class="btn primary generate" id="generate-btn" type="button">Generate</button>
+                </div>
                 <span class="input-hint">We will use your site to tailor clips and positioning.</span>
               </label>
             </div>
+            <div class="status" id="job-status" aria-live="polite"></div>
+            <div class="video-grid" id="video-results"></div>
           </div>
 
           <div class="hero-card" aria-label="Product marketing kit overview">
@@ -392,6 +446,155 @@
       document.addEventListener("click", () => close());
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") close();
+      });
+    })();
+
+    (function () {
+      const input = document.getElementById("site-url");
+      const previewEl = document.getElementById("url-preview");
+      const generateBtn = document.getElementById("generate-btn");
+      const statusEl = document.getElementById("job-status");
+      const resultsEl = document.getElementById("video-results");
+
+      const API_BASE = window.CARROTVIEW_API_BASE || "http://localhost:8787";
+      let activeJobId = null;
+      let lastSubmittedUrl = "";
+      let pollTimer = null;
+
+      function setStatus(message, { error = false, show = true } = {}) {
+        statusEl.textContent = message;
+        statusEl.classList.toggle("show", show);
+        statusEl.classList.toggle("error", error);
+      }
+
+      function clearResults() {
+        resultsEl.innerHTML = "";
+      }
+
+      function normalizeUrl(raw) {
+        let value = raw.trim();
+        if (!value) return { ok: false, value: "", error: "Please paste a URL." };
+        if (!/^https?:\\/\\//i.test(value)) value = `https://${value}`;
+        try {
+          const url = new URL(value);
+          if (!url.hostname.includes(".")) {
+            return { ok: false, value, error: "Enter a valid website domain." };
+          }
+          return { ok: true, value: url.toString(), error: "" };
+        } catch {
+          return { ok: false, value, error: "Enter a valid website URL." };
+        }
+      }
+
+      function updatePreview(raw) {
+        const normalized = normalizeUrl(raw);
+        if (!normalized.ok) {
+          previewEl.innerHTML = "Preview: <span>—</span>";
+          return;
+        }
+        previewEl.innerHTML = `Preview: <span>${normalized.value}</span>`;
+      }
+
+      function renderVideos(videoAUrl, videoBUrl) {
+        if (!videoAUrl || !videoBUrl) return;
+        resultsEl.innerHTML = `
+          <div class="video-card">
+            <h4>Video A</h4>
+            <video controls playsinline src="${videoAUrl}"></video>
+          </div>
+          <div class="video-card">
+            <h4>Video B</h4>
+            <video controls playsinline src="${videoBUrl}"></video>
+          </div>
+        `;
+      }
+
+      async function pollStatus(jobId) {
+        try {
+          const res = await fetch(`${API_BASE}/api/product-marketing/status?jobId=${jobId}`);
+          const data = await res.json();
+          if (!res.ok) {
+            setStatus(data.error || "Unable to fetch job status.", { error: true });
+            return;
+          }
+
+          if (data.status === "completed") {
+            setStatus("Your videos are ready.");
+            renderVideos(data.videoAUrl, data.videoBUrl);
+            input.disabled = false;
+            clearInterval(pollTimer);
+            pollTimer = null;
+            return;
+          }
+
+          if (data.status === "failed") {
+            setStatus(data.error || "We hit a snag generating your videos.", { error: true });
+            input.disabled = false;
+            clearInterval(pollTimer);
+            pollTimer = null;
+            return;
+          }
+
+          const progressText = data.progress ? ` • ${data.progress}` : "";
+          setStatus(`Working on it${progressText}`);
+        } catch (err) {
+          setStatus("Network error. Please try again.", { error: true });
+          input.disabled = false;
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }
+
+      async function submitUrl(url) {
+        clearResults();
+        setStatus("Starting your request...");
+        input.disabled = true;
+        generateBtn.disabled = true;
+        lastSubmittedUrl = url;
+
+        try {
+          const res = await fetch(`${API_BASE}/api/product-marketing/generate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            setStatus(data.error || "Unable to start. Check the URL.", { error: true });
+            input.disabled = false;
+            generateBtn.disabled = false;
+            return;
+          }
+
+          activeJobId = data.jobId;
+          setStatus("Queued. Reading your website...");
+
+          if (pollTimer) clearInterval(pollTimer);
+          pollTimer = setInterval(() => pollStatus(activeJobId), 5000);
+          pollStatus(activeJobId);
+        } catch (err) {
+          setStatus("Network error. Please try again.", { error: true });
+          input.disabled = false;
+          generateBtn.disabled = false;
+        }
+      }
+
+      input.addEventListener("input", (event) => {
+        updatePreview(event.target.value);
+      });
+
+      generateBtn.addEventListener("click", () => {
+        const normalized = normalizeUrl(input.value);
+        if (!normalized.ok) {
+          setStatus(normalized.error, { error: true });
+          return;
+        }
+        if (normalized.value === lastSubmittedUrl) {
+          setStatus("This URL was already submitted.");
+          return;
+        }
+        submitUrl(normalized.value);
       });
     })();
   </script>

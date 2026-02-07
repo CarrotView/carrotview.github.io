@@ -8,7 +8,7 @@ interface UrlInputProps {
   apiEndpoint?: string;
 }
 
-const UrlInput = ({ onSubmit, apiEndpoint = "http://localhost:5000/process" }: UrlInputProps) => {
+const UrlInput = ({ onSubmit, apiEndpoint = "http://127.0.0.1:8000/submit_url" }: UrlInputProps) => {
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -25,12 +25,9 @@ const UrlInput = ({ onSubmit, apiEndpoint = "http://localhost:5000/process" }: U
     setMessage("");
 
     try {
-      const response = await fetch(apiEndpoint, {
+      const fullUrl = `${apiEndpoint}?url=${encodeURIComponent(url)}`;
+      const response = await fetch(fullUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
       });
 
       if (!response.ok) {

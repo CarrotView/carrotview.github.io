@@ -25,7 +25,7 @@ const Hero = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-xl">
-              !!!!!CarrotView uses advanced computer vision and AI to analyze video footage instantly, 
+              CarrotView uses advanced computer vision and AI to analyze video footage instantly, 
               helping you maintain compliance, ensure safety, and resolve conflicts—without watching hours of video.
             </p>
             

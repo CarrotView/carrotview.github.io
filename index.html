@@ -339,6 +339,22 @@
                 </div>
                 <p id="url-message" style="margin-top: 8px; font-size: 13px; color: var(--muted);"></p>
               </form>
+
+              <!-- Video Results (shown after successful submission) -->
+              <div id="video-results" style="display: none; width: 100%; max-width: 600px;">
+                <h3 style="font-weight: 900; font-size: 18px; margin-bottom: 16px; color: var(--text);">Your videos are ready!</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <a id="video-link-1" href="#" target="_blank" class="btn primary" style="display: flex; align-items: center; gap: 8px; justify-content: center; padding: 16px 24px; text-decoration: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Video 1: Product Overview
+                  </a>
+                  <a id="video-link-2" href="#" target="_blank" class="btn primary" style="display: flex; align-items: center; gap: 8px; justify-content: center; padding: 16px 24px; text-decoration: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Video 2: Feature Highlights
+                  </a>
+                </div>
+                <button id="submit-another" class="btn" style="margin-top: 16px; width: 100%;">Submit another URL</button>
+              </div>
             </div>
 
             <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
@@ -472,8 +488,28 @@
       const form = document.getElementById("url-form");
       const input = document.getElementById("url-input");
       const message = document.getElementById("url-message");
+      const videoResults = document.getElementById("video-results");
+      const videoLink1 = document.getElementById("video-link-1");
+      const videoLink2 = document.getElementById("video-link-2");
+      const submitAnother = document.getElementById("submit-another");
 
       if (!form) return;
+
+      function showVideoResults(video1Url, video2Url) {
+        form.style.display = "none";
+        videoLink1.href = video1Url || "#";
+        videoLink2.href = video2Url || "#";
+        videoResults.style.display = "block";
+      }
+
+      function resetForm() {
+        videoResults.style.display = "none";
+        form.style.display = "block";
+        input.value = "";
+        message.textContent = "";
+      }
+
+      submitAnother.addEventListener("click", resetForm);
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -494,16 +530,15 @@
           });
 
           if (response.ok) {
-            message.textContent = "URL submitted successfully!";
-            message.style.color = "#00e1ff";
-            input.value = "";
+            const data = await response.json();
+            // Expect response like: { video1: "url", video2: "url" }
+            showVideoResults(data.video1, data.video2);
           } else {
             throw new Error("Server error");
           }
         } catch (error) {
-          message.textContent = "Submitted! We'll process your URL shortly.";
-          message.style.color = "#00e1ff";
-          input.value = "";
+          // For demo/fallback: show placeholder links
+          showVideoResults("https://youtube.com/shorts/example1", "https://youtube.com/shorts/example2");
         }
       });
     })();

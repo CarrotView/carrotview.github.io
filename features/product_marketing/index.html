@@ -474,9 +474,12 @@
       function normalizeUrl(raw) {
         let value = raw.trim();
         if (!value) return { ok: false, value: "", error: "Please paste a URL." };
-        if (!/^https?:\\/\\//i.test(value)) value = `https://${value}`;
+        if (!value.includes("://")) value = `https://${value}`;
         try {
           const url = new URL(value);
+          if (url.protocol !== "http:" && url.protocol !== "https:") {
+            return { ok: false, value, error: "URL must start with http or https." };
+          }
           if (!url.hostname.includes(".")) {
             return { ok: false, value, error: "Enter a valid website domain." };
           }

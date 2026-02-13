@@ -339,7 +339,7 @@
             </p>
 
             <div class="cta-row">
-              <label class="input-wrap" for="site-url">
+              <form class="input-wrap" id="search-form">
                 <input
                   id="site-url"
                   class="url-input"
@@ -351,10 +351,10 @@
                 />
                 <div class="input-actions">
                   <span class="url-preview" id="url-preview">Preview: <span>—</span></span>
-                  <button class="btn primary generate" id="generate-btn" type="button">Generate</button>
+                  <button class="btn primary generate" id="generate-btn" type="submit">Generate</button>
                 </div>
                 <span class="input-hint">We will use your site to tailor clips and positioning.</span>
-              </label>
+              </form>
             </div>
             <div class="status" id="job-status" aria-live="polite"></div>
             <div class="video-grid" id="video-results"></div>
@@ -450,6 +450,7 @@
     })();
 
     (function () {
+      const form = document.getElementById("search-form");
       const input = document.getElementById("site-url");
       const previewEl = document.getElementById("url-preview");
       const generateBtn = document.getElementById("generate-btn");
@@ -460,6 +461,7 @@
       let activeJobId = null;
       let lastSubmittedUrl = "";
       let pollTimer = null;
+      let isLoading = false;
 
       function setStatus(message, { error = false, show = true } = {}) {
         statusEl.textContent = message;
@@ -469,6 +471,13 @@
 
       function clearResults() {
         resultsEl.innerHTML = "";
+      }
+
+      function setLoading(next) {
+        isLoading = next;
+        input.disabled = next;
+        generateBtn.disabled = next;
+        generateBtn.textContent = next ? "Analyzing..." : "Generate";
       }
 
       function normalizeUrl(raw) {
@@ -524,7 +533,7 @@
           if (data.status === "completed") {
             setStatus("Your videos are ready.");
             renderVideos(data.videoAUrl, data.videoBUrl);
-            input.disabled = false;
+            setLoading(false);
             clearInterval(pollTimer);
             pollTimer = null;
             return;
@@ -532,7 +541,7 @@
 
           if (data.status === "failed") {
             setStatus(data.error || "We hit a snag generating your videos.", { error: true });
-            input.disabled = false;
+            setLoading(false);
             clearInterval(pollTimer);
             pollTimer = null;
             return;
@@ -542,7 +551,7 @@
           setStatus(`Working on it${progressText}`);
         } catch (err) {
           setStatus("Network error. Please try again.", { error: true });
-          input.disabled = false;
+          setLoading(false);
           clearInterval(pollTimer);
           pollTimer = null;
         }
@@ -551,8 +560,7 @@
       async function submitUrl(url) {
         clearResults();
         setStatus("Starting your request...");
-        input.disabled = true;
-        generateBtn.disabled = true;
+        setLoading(true);
         lastSubmittedUrl = url;
 
         try {
@@ -565,8 +573,7 @@
           const data = await res.json();
           if (!res.ok) {
             setStatus(data.error || "Unable to start. Check the URL.", { error: true });
-            input.disabled = false;
-            generateBtn.disabled = false;
+            setLoading(false);
             return;
           }
 
@@ -578,8 +585,7 @@
           pollStatus(activeJobId);
         } catch (err) {
           setStatus("Network error. Please try again.", { error: true });
-          input.disabled = false;
-          generateBtn.disabled = false;
+          setLoading(false);
         }
       }
 
@@ -587,18 +593,33 @@
         updatePreview(event.target.value);
       });
 
-      generateBtn.addEventListener("click", () => {
+      function handleSubmit(event) {
+        event.preventDefault();
+        if (isLoading) return;
+
         const normalized = normalizeUrl(input.value);
         if (!normalized.ok) {
           setStatus(normalized.error, { error: true });
-          return;
+          return false;
         }
+
+        // Keep URL parsing strict, matching the attached search-bar behavior.
+        try {
+          new URL(normalized.value);
+        } catch (_err) {
+          setStatus("Please enter a valid URL (e.g., https://example.com)", { error: true });
+          return false;
+        }
+
         if (normalized.value === lastSubmittedUrl) {
           setStatus("This URL was already submitted.");
-          return;
+          return false;
         }
         submitUrl(normalized.value);
-      });
+        return false;
+      }
+
+      form.addEventListener("submit", handleSubmit);
     })();
   </script>
 </body>

@@ -6,15 +6,21 @@ export function buildStrategyPrompt({ url, combinedText }) {
 - value_props: array of concise value propositions
 - differentiators: array of unique advantages
 - competitors: array of likely competitors
-- prompt_a: a 1-paragraph video prompt for a 30-60s YouTube Short with a feature-forward angle
-- prompt_b: a 1-paragraph video prompt for a 30-60s YouTube Short with a pain-point-to-outcome angle
+- message_framework: object with keys hook, problem, solution, cta (each should be concise and distinct)
+- style_controls: object with keys visual_style, pacing, camera_technique, mood
+- prompt_a: compiled video prompt from the framework and style controls
+- prompt_b: alternate compiled video prompt with a different opening hook
 - tone: short description of tone
 
 Rules:
 - Output ONLY JSON. No markdown.
 - Make prompts vivid, concrete, and suitable for a text-to-video model.
-- Keep each prompt under 110 words.
+- Keep hook/problem/solution/cta each under 30 words.
+- Keep each compiled prompt under 120 words.
 - Assume vertical 9:16 format.
+- Ensure hook and solution are never semantically identical.
+- In message_framework.solution, explicitly explain how the company from the submitted URL solves the user's problem using its product features and domain expertise.
+- Avoid generic solution language; include concrete capability-level wording.
 
 Website URL: ${url}
 

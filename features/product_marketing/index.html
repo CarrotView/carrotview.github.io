@@ -252,6 +252,128 @@
     }
     .video-card h4{ margin: 0 0 8px; font-size: 14px; }
     .video-card video{ width: 100%; border-radius: 12px; background: #000; }
+    .prompt-editor{
+      margin-top: 14px;
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 14px;
+      display:none;
+    }
+    .prompt-editor.show{ display:block; }
+    .prompt-editor h4{
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,.9);
+    }
+    .prompt-grid{
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px){
+      .prompt-grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .field{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label{
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.72);
+      letter-spacing: .2px;
+      text-transform: uppercase;
+    }
+    .prompt-editor textarea{
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(7,10,18,.45);
+      color: var(--text);
+      padding: 12px;
+      font: inherit;
+      line-height: 1.45;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    .prompt-editor textarea:focus{
+      border-color: rgba(0,225,255,.6);
+      box-shadow: 0 0 0 3px rgba(0,225,255,.15);
+    }
+    .platform-row{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .platform-label{
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.72);
+      letter-spacing: .2px;
+      text-transform: uppercase;
+    }
+    .platform-picker{
+      display:flex;
+      gap: 8px;
+    }
+    .platform-btn{
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      color: rgba(255,255,255,.78);
+    }
+    .platform-btn svg{ width: 20px; height: 20px; }
+    .platform-btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.35); }
+    .platform-btn.active{
+      border-color: rgba(0,225,255,.8);
+      background: rgba(0,225,255,.16);
+      color: rgba(255,255,255,.96);
+      box-shadow: 0 0 0 2px rgba(0,225,255,.2);
+    }
+    .editor-actions{
+      margin-top: 10px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .style-row{
+      margin-top: 10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 900px){
+      .style-row{ grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .style-select{
+      width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(7,10,18,.45);
+      color: var(--text);
+      padding: 0 10px;
+      font: inherit;
+      outline: none;
+    }
+    .style-select:focus{
+      border-color: rgba(0,225,255,.6);
+      box-shadow: 0 0 0 3px rgba(0,225,255,.15);
+    }
 
     .hero-card{
       border-radius: var(--radius);
@@ -351,12 +473,88 @@
                 />
                 <div class="input-actions">
                   <span class="url-preview" id="url-preview">Preview: <span>—</span></span>
-                  <button class="btn primary generate" id="generate-btn" type="submit">Generate</button>
+                  <button class="btn primary generate" id="generate-btn" type="submit">Generate Prompt</button>
                 </div>
                 <span class="input-hint">We will use your site to tailor clips and positioning.</span>
               </form>
             </div>
             <div class="status" id="job-status" aria-live="polite"></div>
+            <div class="prompt-editor" id="prompt-editor">
+              <h4>Review and edit your video brief</h4>
+              <div class="platform-row">
+                <span class="platform-label">Publishing platform</span>
+                <div class="platform-picker" id="platform-picker">
+                  <button class="platform-btn active" data-platform="linkedin" title="LinkedIn" aria-label="LinkedIn" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor"></rect>
+                      <rect x="6.2" y="10" width="2.2" height="7.8" fill="#070A12"></rect>
+                      <circle cx="7.3" cy="7.4" r="1.2" fill="#070A12"></circle>
+                      <path d="M10.5 10h2.1v1.1c.4-.7 1.3-1.3 2.6-1.3 2.4 0 3.2 1.5 3.2 3.9v4.1h-2.3v-3.7c0-1.2-.2-2.1-1.4-2.1-1.2 0-1.8.8-1.8 2v3.8h-2.3V10z" fill="#070A12"></path>
+                    </svg>
+                  </button>
+                  <button class="platform-btn" data-platform="youtube_shorts" title="YouTube Shorts" aria-label="YouTube Shorts" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="3" y="5" width="18" height="14" rx="4" fill="#FF0033"></rect>
+                      <polygon points="11,9 16,12 11,15" fill="#fff"></polygon>
+                    </svg>
+                  </button>
+                  <button class="platform-btn" data-platform="tiktok" title="TikTok" aria-label="TikTok" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="2" y="2" width="20" height="20" rx="4" fill="#121212"></rect>
+                      <path d="M14.5 7.2c.7.9 1.6 1.4 2.7 1.5v2c-1-.1-2-.4-2.9-1v4.8c0 2-1.5 3.5-3.6 3.5s-3.6-1.5-3.6-3.5 1.5-3.5 3.6-3.5c.2 0 .4 0 .6.1v2.1a1.6 1.6 0 00-.6-.1c-.8 0-1.5.6-1.5 1.5s.7 1.5 1.5 1.5 1.5-.6 1.5-1.5V6h2.3v1.2z" fill="#fff"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="prompt-grid">
+                <div class="field">
+                  <label for="prompt-hook">Hook</label>
+                  <textarea id="prompt-hook" placeholder="Open with a sharp attention-grabbing line..."></textarea>
+                </div>
+                <div class="field">
+                  <label for="prompt-problem">Problem</label>
+                  <textarea id="prompt-problem" placeholder="Describe the core pain point for the audience..."></textarea>
+                </div>
+                <div class="field">
+                  <label for="prompt-solution">Solution</label>
+                  <textarea id="prompt-solution" placeholder="Position the product as the clear solution..."></textarea>
+                </div>
+                <div class="field">
+                  <label for="prompt-cta">Call To Action</label>
+                  <textarea id="prompt-cta" placeholder="Give a clear action for the viewer..."></textarea>
+                </div>
+              </div>
+              <div class="style-row">
+                <div class="field">
+                  <label for="style-visual">Visual Style</label>
+                  <select id="style-visual" class="style-select">
+                    <option value="clean product UI, premium b2b look">Clean Product UI</option>
+                    <option value="cinematic launch vibe with dramatic lighting">Cinematic Launch</option>
+                    <option value="data-driven modern ad with overlays">Data-Driven Ad</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="style-pacing">Pacing</label>
+                  <select id="style-pacing" class="style-select">
+                    <option value="fast with decisive cuts">Fast</option>
+                    <option value="medium with balanced rhythm">Medium</option>
+                    <option value="high-energy with aggressive pacing">High Energy</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="style-technique">Camera Technique</label>
+                  <select id="style-technique" class="style-select">
+                    <option value="quick push-ins and smart close-ups">Push-ins + Close-ups</option>
+                    <option value="dynamic parallax and punch-in zooms">Parallax + Punch Zoom</option>
+                    <option value="steady product hero shots with kinetic overlays">Hero Shots + Kinetic Text</option>
+                  </select>
+                </div>
+              </div>
+              <div class="editor-actions">
+                <button class="btn" id="download-json-btn" type="button">Download JSON</button>
+                <button class="btn primary" id="generate-video-btn" type="button">Generate Videos</button>
+              </div>
+            </div>
             <div class="video-grid" id="video-results"></div>
           </div>
 
@@ -454,6 +652,17 @@
       const input = document.getElementById("site-url");
       const previewEl = document.getElementById("url-preview");
       const generateBtn = document.getElementById("generate-btn");
+      const generateVideoBtn = document.getElementById("generate-video-btn");
+      const downloadJsonBtn = document.getElementById("download-json-btn");
+      const promptEditor = document.getElementById("prompt-editor");
+      const platformPicker = document.getElementById("platform-picker");
+      const promptHook = document.getElementById("prompt-hook");
+      const promptProblem = document.getElementById("prompt-problem");
+      const promptSolution = document.getElementById("prompt-solution");
+      const promptCta = document.getElementById("prompt-cta");
+      const styleVisual = document.getElementById("style-visual");
+      const stylePacing = document.getElementById("style-pacing");
+      const styleTechnique = document.getElementById("style-technique");
       const statusEl = document.getElementById("job-status");
       const resultsEl = document.getElementById("video-results");
 
@@ -461,7 +670,9 @@
       let activeJobId = null;
       let lastSubmittedUrl = "";
       let pollTimer = null;
-      let isLoading = false;
+      let isPromptLoading = false;
+      let isVideoLoading = false;
+      let selectedPlatform = "linkedin";
 
       function setStatus(message, { error = false, show = true } = {}) {
         statusEl.textContent = message;
@@ -473,11 +684,110 @@
         resultsEl.innerHTML = "";
       }
 
-      function setLoading(next) {
-        isLoading = next;
+      function showPromptEditor(show) {
+        promptEditor.classList.toggle("show", show);
+      }
+
+      function setPromptLoading(next) {
+        isPromptLoading = next;
         input.disabled = next;
         generateBtn.disabled = next;
-        generateBtn.textContent = next ? "Analyzing..." : "Generate";
+        generateBtn.textContent = next ? "Generating Prompt..." : "Generate Prompt";
+      }
+
+      function setVideoLoading(next) {
+        isVideoLoading = next;
+        promptHook.disabled = next;
+        promptProblem.disabled = next;
+        promptSolution.disabled = next;
+        promptCta.disabled = next;
+        platformPicker.querySelectorAll(".platform-btn").forEach((btn) => {
+          btn.disabled = next;
+        });
+        generateVideoBtn.disabled = next;
+        downloadJsonBtn.disabled = next;
+        generateVideoBtn.textContent = next ? "Generating Videos..." : "Generate Videos";
+      }
+
+      function fillPromptFieldsFromPlan(plan) {
+        if (!plan || typeof plan !== "object") return false;
+        const framework = plan.message_framework || {};
+        const styles = plan.style_controls || {};
+        promptHook.value = framework.hook || "";
+        promptProblem.value = framework.problem || "";
+        promptSolution.value = framework.solution || "";
+        promptCta.value = framework.cta || "";
+        if (styles.visual_style) styleVisual.value = styles.visual_style;
+        if (styles.pacing) stylePacing.value = styles.pacing;
+        if (styles.camera_technique) styleTechnique.value = styles.camera_technique;
+        return Boolean(promptHook.value || promptProblem.value || promptSolution.value);
+      }
+
+      function fillPromptFieldsFromText(source) {
+        const text = (source || "").trim();
+        if (!text) return;
+
+        const lines = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+        const hookLine = lines.find((line) => /^hook[:\-]/i.test(line));
+        const problemLine = lines.find((line) => /^problem[:\-]/i.test(line));
+        const solutionLine = lines.find((line) => /^solution[:\-]/i.test(line));
+        const ctaLine = lines.find((line) => /^cta[:\-]|^call to action[:\-]/i.test(line));
+
+        promptHook.value = hookLine ? hookLine.replace(/^hook[:\-]\s*/i, "") : (lines[0] || "");
+        promptProblem.value = problemLine ? problemLine.replace(/^problem[:\-]\s*/i, "") : (lines[1] || "");
+        promptSolution.value = solutionLine ? solutionLine.replace(/^solution[:\-]\s*/i, "") : text;
+        promptCta.value = ctaLine ? ctaLine.replace(/^(cta|call to action)[:\-]\s*/i, "") : "";
+      }
+
+      function getPromptPayload() {
+        return {
+          platform: selectedPlatform,
+          message_framework: {
+            hook: promptHook.value.trim(),
+            problem: promptProblem.value.trim(),
+            solution: promptSolution.value.trim(),
+            cta: promptCta.value.trim()
+          },
+          style_controls: {
+            visual_style: styleVisual.value,
+            pacing: stylePacing.value,
+            camera_technique: styleTechnique.value
+          }
+        };
+      }
+
+      function buildCompiledPrompt() {
+        const payload = getPromptPayload();
+        const hook = payload.message_framework.hook;
+        const problem = payload.message_framework.problem;
+        const solution = payload.message_framework.solution;
+        const cta = payload.message_framework.cta;
+
+        const parts = [
+          `Create a ${selectedPlatform.replace("_", " ")} short-form marketing video in 9:16 format.`,
+          `Hook: ${hook}`,
+          `Problem: ${problem}`,
+          `Solution: ${solution}`,
+          `Call to action: ${cta}`,
+          `Visual style: ${payload.style_controls.visual_style}`,
+          `Pacing: ${payload.style_controls.pacing}`,
+          `Camera technique: ${payload.style_controls.camera_technique}`,
+          "Keep the output professional, credible, and highly engaging for a marketing audience. Use strong first 2 seconds, clear product framing, and conversion-focused ending."
+        ];
+        return parts.join("\n");
+      }
+
+      function downloadPromptJson() {
+        const payload = getPromptPayload();
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `carrotview_prompt_${activeJobId || "draft"}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
       }
 
       function normalizeUrl(raw) {
@@ -533,7 +843,19 @@
           if (data.status === "completed") {
             setStatus("Your videos are ready.");
             renderVideos(data.videoAUrl, data.videoBUrl);
-            setLoading(false);
+            setVideoLoading(false);
+            setPromptLoading(false);
+            clearInterval(pollTimer);
+            pollTimer = null;
+            return;
+          }
+
+          if (data.status === "prompt_ready") {
+            setStatus("Prompt generated. Review it and click Generate Videos.");
+            const loadedFromPlan = fillPromptFieldsFromPlan(data.generatedPlan);
+            if (!loadedFromPlan) fillPromptFieldsFromText(data.generatedPrompt || "");
+            showPromptEditor(true);
+            setPromptLoading(false);
             clearInterval(pollTimer);
             pollTimer = null;
             return;
@@ -541,7 +863,8 @@
 
           if (data.status === "failed") {
             setStatus(data.error || "We hit a snag generating your videos.", { error: true });
-            setLoading(false);
+            setVideoLoading(false);
+            setPromptLoading(false);
             clearInterval(pollTimer);
             pollTimer = null;
             return;
@@ -551,20 +874,22 @@
           setStatus(`Working on it${progressText}`);
         } catch (err) {
           setStatus("Network error. Please try again.", { error: true });
-          setLoading(false);
+          setVideoLoading(false);
+          setPromptLoading(false);
           clearInterval(pollTimer);
           pollTimer = null;
         }
       }
 
-      async function submitUrl(url) {
+      async function submitUrlForPrompt(url) {
         clearResults();
+        showPromptEditor(false);
         setStatus("Starting your request...");
-        setLoading(true);
+        setPromptLoading(true);
         lastSubmittedUrl = url;
 
         try {
-          const res = await fetch(`${API_BASE}/api/product-marketing/generate`, {
+          const res = await fetch(`${API_BASE}/api/product-marketing/generate-prompt`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url })
@@ -573,7 +898,7 @@
           const data = await res.json();
           if (!res.ok) {
             setStatus(data.error || "Unable to start. Check the URL.", { error: true });
-            setLoading(false);
+            setPromptLoading(false);
             return;
           }
 
@@ -585,7 +910,44 @@
           pollStatus(activeJobId);
         } catch (err) {
           setStatus("Network error. Please try again.", { error: true });
-          setLoading(false);
+          setPromptLoading(false);
+        }
+      }
+
+      async function submitPromptForVideo() {
+        if (!activeJobId) {
+          setStatus("Generate a prompt first.", { error: true });
+          return;
+        }
+        const editedPrompt = buildCompiledPrompt();
+        if (!promptHook.value.trim() || !promptProblem.value.trim() || !promptSolution.value.trim()) {
+          setStatus("Please complete Hook, Problem, and Solution before generating videos.", { error: true });
+          return;
+        }
+
+        setVideoLoading(true);
+        setStatus("Queued. Starting video generation...");
+        clearResults();
+
+        try {
+          const res = await fetch(`${API_BASE}/api/product-marketing/generate-videos`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jobId: activeJobId, prompt: editedPrompt })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setStatus(data.error || "Unable to start video generation.", { error: true });
+            setVideoLoading(false);
+            return;
+          }
+
+          if (pollTimer) clearInterval(pollTimer);
+          pollTimer = setInterval(() => pollStatus(activeJobId), 5000);
+          pollStatus(activeJobId);
+        } catch (err) {
+          setStatus("Network error. Please try again.", { error: true });
+          setVideoLoading(false);
         }
       }
 
@@ -595,7 +957,7 @@
 
       function handleSubmit(event) {
         event.preventDefault();
-        if (isLoading) return;
+        if (isPromptLoading || isVideoLoading) return;
 
         const normalized = normalizeUrl(input.value);
         if (!normalized.ok) {
@@ -612,14 +974,26 @@
         }
 
         if (normalized.value === lastSubmittedUrl) {
-          setStatus("This URL was already submitted.");
-          return false;
+          if (!promptEditor.classList.contains("show")) {
+            setStatus("This URL was already submitted.");
+            return false;
+          }
         }
-        submitUrl(normalized.value);
+        submitUrlForPrompt(normalized.value);
         return false;
       }
 
       form.addEventListener("submit", handleSubmit);
+      platformPicker.addEventListener("click", (event) => {
+        const btn = event.target.closest(".platform-btn");
+        if (!btn) return;
+        selectedPlatform = btn.dataset.platform || "linkedin";
+        platformPicker.querySelectorAll(".platform-btn").forEach((node) => {
+          node.classList.toggle("active", node === btn);
+        });
+      });
+      generateVideoBtn.addEventListener("click", submitPromptForVideo);
+      downloadJsonBtn.addEventListener("click", downloadPromptJson);
     })();
   </script>
 </body>

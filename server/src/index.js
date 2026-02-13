@@ -33,6 +33,30 @@ const generateVideoSchema = z.object({
   prompt: z.string().min(20)
 });
 
+const generateImageSchema = z.object({
+  jobId: z.string().uuid(),
+  promptPlan: z.object({
+    platform: z.string().min(1),
+    audience_targeting: z.object({
+      geography: z.string().min(1),
+      job_title: z.string().min(1),
+      company_category: z.string().min(1)
+    }),
+    message_framework: z.object({
+      hook: z.string().min(1),
+      problem: z.string().min(1),
+      solution: z.string().min(1),
+      cta: z.string().min(1)
+    }),
+    style_controls: z.object({
+      visual_style: z.string().min(1),
+      pacing: z.string().min(1),
+      camera_technique: z.string().min(1),
+      image_technique: z.string().min(1)
+    })
+  })
+});
+
 app.post("/api/product-marketing/generate-prompt", async (req, res) => {
   try {
     const body = generatePromptSchema.parse(req.body);
@@ -73,6 +97,33 @@ app.post("/api/product-marketing/generate-videos", async (req, res) => {
   }
 });
 
+app.post("/api/product-marketing/generate-image", async (req, res) => {
+  try {
+    const body = generateImageSchema.parse(req.body);
+    const job = await getJob(body.jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    const nextSummary = {
+      ...(job.summary_json || {}),
+      prompt_plan: body.promptPlan
+    };
+    await updateJob(body.jobId, {
+      summary_json: nextSummary,
+      status: "queued_image",
+      progress: "Queued for image generation",
+      error: null
+    });
+    await jobQueue.add("generate-image", { id: body.jobId, type: "image" });
+    console.log(`[api] queued image job ${body.jobId}`);
+    return res.json({ jobId: body.jobId });
+  } catch (err) {
+    const message = err instanceof z.ZodError ? err.errors[0]?.message : err.message;
+    return res.status(400).json({ error: message || "Invalid request" });
+  }
+});
+
 app.get("/api/product-marketing/status", async (req, res) => {
   const id = req.query.jobId;
   if (!id || typeof id !== "string") {
@@ -84,6 +135,7 @@ app.get("/api/product-marketing/status", async (req, res) => {
     return res.status(404).json({ error: "Job not found" });
   }
 
+  const generatedAssets = (job.summary_json && job.summary_json.generated_assets) || {};
   res.json({
     jobId: job.id,
     status: job.status,
@@ -92,6 +144,8 @@ app.get("/api/product-marketing/status", async (req, res) => {
     generatedPlan: job.summary_json,
     videoAUrl: job.video_a_url,
     videoBUrl: job.video_b_url,
+    imageUrl: generatedAssets.image_url || null,
+    imagePromptUsed: generatedAssets.image_prompt || null,
     error: job.error
   });
 });

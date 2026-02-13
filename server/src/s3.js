@@ -25,3 +25,16 @@ export async function uploadVideo({ key, buffer }) {
 
   return buildPublicUrl(key);
 }
+
+export async function uploadImage({ key, buffer, contentType = "image/png" }) {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: config.s3Bucket,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType
+    })
+  );
+
+  return buildPublicUrl(key);
+}

@@ -14,6 +14,8 @@ const parsedSeconds = Number(process.env.VIDEO_SECONDS || 12);
 
 const allowedSizes = new Set(["720x1280", "1024x1792", "1280x720", "1792x1024"]);
 const requestedSize = process.env.VIDEO_SIZE || "720x1280";
+const allowedImageSizes = new Set(["1024x1024", "1024x1536", "1536x1024"]);
+const requestedImageSize = process.env.IMAGE_SIZE || "1024x1024";
 
 export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
@@ -25,8 +27,10 @@ export const config = {
   openaiApiKey: requireEnv("OPENAI_API_KEY"),
   llmModel: process.env.LLM_MODEL || "gpt-4o-mini",
   videoModel: process.env.VIDEO_MODEL || "sora-2",
+  imageModel: process.env.IMAGE_MODEL || "gpt-image-1",
   videoSeconds: allowedSeconds.has(parsedSeconds) ? parsedSeconds : 12,
   videoSize: allowedSizes.has(requestedSize) ? requestedSize : "720x1280",
+  imageSize: allowedImageSizes.has(requestedImageSize) ? requestedImageSize : "1024x1024",
   s3Region: requireEnv("S3_REGION"),
   s3Bucket: requireEnv("S3_BUCKET"),
   s3AccessKeyId: requireEnv("S3_ACCESS_KEY_ID"),

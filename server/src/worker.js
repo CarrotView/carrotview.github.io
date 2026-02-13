@@ -6,7 +6,8 @@ import { crawlWebsite } from "./crawler.js";
 import { openai } from "./openaiClient.js";
 import { buildStrategyPrompt } from "./prompts.js";
 import { generateVideo } from "./video.js";
-import { uploadVideo } from "./s3.js";
+import { uploadImage, uploadVideo } from "./s3.js";
+import { generateImage } from "./image.js";
 
 async function generatePrompts({ url, combinedText }) {
   const prompt = buildStrategyPrompt({ url, combinedText });
@@ -46,6 +47,29 @@ function compilePromptFromStrategy(strategy) {
     styles.mood ? `Mood: ${styles.mood}` : ""
   ].filter(Boolean);
   return chunks.join("\n");
+}
+
+function compileImagePromptFromPlan(plan) {
+  const target = plan?.audience_targeting || {};
+  const framework = plan?.message_framework || {};
+  const style = plan?.style_controls || {};
+  const platform = plan?.platform || "linkedin";
+
+  return [
+    `Create a professional ${platform} ad campaign image.`,
+    `Audience geography: ${target.geography || "global"}.`,
+    `Audience job title/function: ${target.job_title || "marketing leaders"}.`,
+    `Audience company category: ${target.company_category || "B2B SaaS"}.`,
+    `Hook text: ${framework.hook || ""}`,
+    `Problem text: ${framework.problem || ""}`,
+    `Solution text: ${framework.solution || ""}`,
+    `CTA text: ${framework.cta || ""}`,
+    `Visual style: ${style.visual_style || "clean product UI"}.`,
+    `Pacing expression: ${style.pacing || "fast and clear"}.`,
+    `Composition technique: ${style.camera_technique || "hero product framing"}.`,
+    `Image technique: ${style.image_technique || "vector illustration"}.`,
+    "Design requirements: sharp hierarchy, clear whitespace, modern typography, conversion-focused composition, no clutter, brand-safe professional tone."
+  ].join("\n");
 }
 
 const worker = new Worker(
@@ -112,6 +136,39 @@ const worker = new Worker(
           video_b_url: videoBUrl
         });
         console.log(`[worker] video job ${id} completed`);
+        return;
+      }
+
+      if (type === "image") {
+        const plan = dbJob.summary_json?.prompt_plan;
+        if (!plan) {
+          throw new Error("Prompt plan is missing for image generation.");
+        }
+
+        const imagePrompt = compileImagePromptFromPlan(plan);
+        console.log(`[worker] starting image job ${id}`);
+        await updateJob(id, { status: "generating_image", progress: "Generating campaign image" });
+        const image = await generateImage(imagePrompt);
+        console.log(`[worker] image generated for ${id}`);
+
+        const imageUrl = await uploadImage({
+          key: `product-marketing/${id}/campaign-image.png`,
+          buffer: image.buffer,
+          contentType: image.contentType
+        });
+
+        await updateJob(id, {
+          summary_json: {
+            ...(dbJob.summary_json || {}),
+            generated_assets: {
+              image_url: imageUrl,
+              image_prompt: imagePrompt
+            }
+          },
+          status: "completed",
+          progress: "Ready"
+        });
+        console.log(`[worker] image job ${id} completed`);
       }
     } catch (error) {
       console.error(`[worker] job ${id} failed`, error);

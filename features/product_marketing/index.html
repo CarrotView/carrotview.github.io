@@ -75,6 +75,7 @@
       white-space: nowrap;
     }
     .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18); }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
     .btn.primary{
       border: none;
       background: linear-gradient(135deg, rgba(130,95,255,1), rgba(0,225,255,1));
@@ -252,6 +253,16 @@
     }
     .video-card h4{ margin: 0 0 8px; font-size: 14px; }
     .video-card video{ width: 100%; border-radius: 12px; background: #000; }
+    .image-card{
+      margin-top: 18px;
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+      box-shadow: var(--shadow2);
+    }
+    .image-card h4{ margin: 0 0 10px; font-size: 14px; }
+    .image-card img{ width: 100%; border-radius: 12px; display:block; }
     .prompt-editor{
       margin-top: 14px;
       border-radius: var(--radius2);
@@ -355,6 +366,15 @@
       display:grid;
       grid-template-columns: 1fr;
       gap: 10px;
+    }
+    .section-label{
+      margin-top: 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.72);
+      letter-spacing: .2px;
+      text-transform: uppercase;
     }
     @media (min-width: 900px){
       .style-row{ grid-template-columns: 1fr 1fr 1fr; }
@@ -524,6 +544,40 @@
                   <textarea id="prompt-cta" placeholder="Give a clear action for the viewer..."></textarea>
                 </div>
               </div>
+              <div class="section-label">Audience Targeting</div>
+              <div class="style-row">
+                <div class="field">
+                  <label for="audience-region">Geography</label>
+                  <select id="audience-region" class="style-select">
+                    <option value="United States and Canada">United States + Canada</option>
+                    <option value="North America">North America</option>
+                    <option value="United Kingdom and Europe">UK + Europe</option>
+                    <option value="India and Southeast Asia">India + Southeast Asia</option>
+                    <option value="Global English-speaking markets">Global English-speaking Markets</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="audience-job-title">Job Function / Title</label>
+                  <select id="audience-job-title" class="style-select">
+                    <option value="Product Marketing Managers and Growth Marketers">Product Marketing + Growth</option>
+                    <option value="CMOs, VPs, and Heads of Marketing">Marketing Leadership (CMO/VP/Head)</option>
+                    <option value="Demand Generation Managers">Demand Generation</option>
+                    <option value="Founders and GTM Leaders">Founders + GTM Leaders</option>
+                    <option value="RevOps and Performance Marketing Teams">RevOps + Performance</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="audience-company-category">Company Category</label>
+                  <select id="audience-company-category" class="style-select">
+                    <option value="B2B SaaS companies">B2B SaaS</option>
+                    <option value="Fintech and Financial Services">Fintech + Financial Services</option>
+                    <option value="Ecommerce and Retail Tech">Ecommerce + Retail Tech</option>
+                    <option value="Agencies and Marketing Services">Agencies + Marketing Services</option>
+                    <option value="Enterprise Software companies">Enterprise Software</option>
+                  </select>
+                </div>
+              </div>
+              <div class="section-label">Visual Direction</div>
               <div class="style-row">
                 <div class="field">
                   <label for="style-visual">Visual Style</label>
@@ -549,10 +603,20 @@
                     <option value="steady product hero shots with kinetic overlays">Hero Shots + Kinetic Text</option>
                   </select>
                 </div>
+                <div class="field">
+                  <label for="style-image-technique">Image Technique</label>
+                  <select id="style-image-technique" class="style-select">
+                    <option value="vector illustration">Vector Illustration</option>
+                    <option value="flat geometric brand illustration">Flat Geometric</option>
+                    <option value="3d product render style">3D Render Style</option>
+                    <option value="isometric product scene">Isometric Scene</option>
+                  </select>
+                </div>
               </div>
               <div class="editor-actions">
                 <button class="btn" id="download-json-btn" type="button">Download JSON</button>
-                <button class="btn primary" id="generate-video-btn" type="button">Generate Videos</button>
+                <button class="btn" id="generate-video-btn" type="button" disabled>Campaign Video</button>
+                <button class="btn primary" id="generate-image-btn" type="button">Generate ad campaign image</button>
               </div>
             </div>
             <div class="video-grid" id="video-results"></div>
@@ -653,6 +717,7 @@
       const previewEl = document.getElementById("url-preview");
       const generateBtn = document.getElementById("generate-btn");
       const generateVideoBtn = document.getElementById("generate-video-btn");
+      const generateImageBtn = document.getElementById("generate-image-btn");
       const downloadJsonBtn = document.getElementById("download-json-btn");
       const promptEditor = document.getElementById("prompt-editor");
       const platformPicker = document.getElementById("platform-picker");
@@ -660,9 +725,13 @@
       const promptProblem = document.getElementById("prompt-problem");
       const promptSolution = document.getElementById("prompt-solution");
       const promptCta = document.getElementById("prompt-cta");
+      const audienceRegion = document.getElementById("audience-region");
+      const audienceJobTitle = document.getElementById("audience-job-title");
+      const audienceCompanyCategory = document.getElementById("audience-company-category");
       const styleVisual = document.getElementById("style-visual");
       const stylePacing = document.getElementById("style-pacing");
       const styleTechnique = document.getElementById("style-technique");
+      const styleImageTechnique = document.getElementById("style-image-technique");
       const statusEl = document.getElementById("job-status");
       const resultsEl = document.getElementById("video-results");
 
@@ -671,7 +740,7 @@
       let lastSubmittedUrl = "";
       let pollTimer = null;
       let isPromptLoading = false;
-      let isVideoLoading = false;
+      let isImageLoading = false;
       let selectedPlatform = "linkedin";
 
       function setStatus(message, { error = false, show = true } = {}) {
@@ -695,31 +764,46 @@
         generateBtn.textContent = next ? "Generating Prompt..." : "Generate Prompt";
       }
 
-      function setVideoLoading(next) {
-        isVideoLoading = next;
+      function setImageLoading(next) {
+        isImageLoading = next;
         promptHook.disabled = next;
         promptProblem.disabled = next;
         promptSolution.disabled = next;
         promptCta.disabled = next;
+        audienceRegion.disabled = next;
+        audienceJobTitle.disabled = next;
+        audienceCompanyCategory.disabled = next;
+        styleVisual.disabled = next;
+        stylePacing.disabled = next;
+        styleTechnique.disabled = next;
+        styleImageTechnique.disabled = next;
         platformPicker.querySelectorAll(".platform-btn").forEach((btn) => {
           btn.disabled = next;
         });
-        generateVideoBtn.disabled = next;
         downloadJsonBtn.disabled = next;
-        generateVideoBtn.textContent = next ? "Generating Videos..." : "Generate Videos";
+        generateImageBtn.disabled = next;
+        generateImageBtn.textContent = next ? "Generating Ad Image..." : "Generate ad campaign image";
       }
 
       function fillPromptFieldsFromPlan(plan) {
         if (!plan || typeof plan !== "object") return false;
         const framework = plan.message_framework || {};
         const styles = plan.style_controls || {};
+        const targeting = plan.audience_targeting || {};
         promptHook.value = framework.hook || "";
         promptProblem.value = framework.problem || "";
         promptSolution.value = framework.solution || "";
         promptCta.value = framework.cta || "";
+        if (targeting.regions) audienceRegion.value = Array.isArray(targeting.regions) ? targeting.regions[0] : targeting.regions;
+        if (targeting.job_titles) audienceJobTitle.value = Array.isArray(targeting.job_titles) ? targeting.job_titles[0] : targeting.job_titles;
+        if (targeting.company_category) audienceCompanyCategory.value = targeting.company_category;
+        if (targeting.industries && !targeting.company_category) {
+          audienceCompanyCategory.value = Array.isArray(targeting.industries) ? targeting.industries[0] : targeting.industries;
+        }
         if (styles.visual_style) styleVisual.value = styles.visual_style;
         if (styles.pacing) stylePacing.value = styles.pacing;
         if (styles.camera_technique) styleTechnique.value = styles.camera_technique;
+        if (styles.image_technique) styleImageTechnique.value = styles.image_technique;
         return Boolean(promptHook.value || promptProblem.value || promptSolution.value);
       }
 
@@ -742,6 +826,11 @@
       function getPromptPayload() {
         return {
           platform: selectedPlatform,
+          audience_targeting: {
+            geography: audienceRegion.value,
+            job_title: audienceJobTitle.value,
+            company_category: audienceCompanyCategory.value
+          },
           message_framework: {
             hook: promptHook.value.trim(),
             problem: promptProblem.value.trim(),
@@ -751,30 +840,10 @@
           style_controls: {
             visual_style: styleVisual.value,
             pacing: stylePacing.value,
-            camera_technique: styleTechnique.value
+            camera_technique: styleTechnique.value,
+            image_technique: styleImageTechnique.value
           }
         };
-      }
-
-      function buildCompiledPrompt() {
-        const payload = getPromptPayload();
-        const hook = payload.message_framework.hook;
-        const problem = payload.message_framework.problem;
-        const solution = payload.message_framework.solution;
-        const cta = payload.message_framework.cta;
-
-        const parts = [
-          `Create a ${selectedPlatform.replace("_", " ")} short-form marketing video in 9:16 format.`,
-          `Hook: ${hook}`,
-          `Problem: ${problem}`,
-          `Solution: ${solution}`,
-          `Call to action: ${cta}`,
-          `Visual style: ${payload.style_controls.visual_style}`,
-          `Pacing: ${payload.style_controls.pacing}`,
-          `Camera technique: ${payload.style_controls.camera_technique}`,
-          "Keep the output professional, credible, and highly engaging for a marketing audience. Use strong first 2 seconds, clear product framing, and conversion-focused ending."
-        ];
-        return parts.join("\n");
       }
 
       function downloadPromptJson() {
@@ -831,6 +900,16 @@
         `;
       }
 
+      function renderImage(imageUrl) {
+        if (!imageUrl) return;
+        resultsEl.innerHTML = `
+          <div class="image-card">
+            <h4>Campaign Image</h4>
+            <img src="${imageUrl}" alt="Generated campaign image" />
+          </div>
+        `;
+      }
+
       async function pollStatus(jobId) {
         try {
           const res = await fetch(`${API_BASE}/api/product-marketing/status?jobId=${jobId}`);
@@ -841,9 +920,14 @@
           }
 
           if (data.status === "completed") {
-            setStatus("Your videos are ready.");
-            renderVideos(data.videoAUrl, data.videoBUrl);
-            setVideoLoading(false);
+            if (data.imageUrl) {
+              setStatus("Your campaign image is ready.");
+              renderImage(data.imageUrl);
+            } else {
+              setStatus("Completed.");
+              renderVideos(data.videoAUrl, data.videoBUrl);
+            }
+            setImageLoading(false);
             setPromptLoading(false);
             clearInterval(pollTimer);
             pollTimer = null;
@@ -851,7 +935,7 @@
           }
 
           if (data.status === "prompt_ready") {
-            setStatus("Prompt generated. Review it and click Generate Videos.");
+            setStatus("Prompt generated. Review it and click Generate ad campaign image.");
             const loadedFromPlan = fillPromptFieldsFromPlan(data.generatedPlan);
             if (!loadedFromPlan) fillPromptFieldsFromText(data.generatedPrompt || "");
             showPromptEditor(true);
@@ -862,8 +946,8 @@
           }
 
           if (data.status === "failed") {
-            setStatus(data.error || "We hit a snag generating your videos.", { error: true });
-            setVideoLoading(false);
+            setStatus(data.error || "We hit a snag generating your campaign image.", { error: true });
+            setImageLoading(false);
             setPromptLoading(false);
             clearInterval(pollTimer);
             pollTimer = null;
@@ -874,7 +958,7 @@
           setStatus(`Working on it${progressText}`);
         } catch (err) {
           setStatus("Network error. Please try again.", { error: true });
-          setVideoLoading(false);
+          setImageLoading(false);
           setPromptLoading(false);
           clearInterval(pollTimer);
           pollTimer = null;
@@ -914,31 +998,31 @@
         }
       }
 
-      async function submitPromptForVideo() {
+      async function submitPromptForImage() {
         if (!activeJobId) {
           setStatus("Generate a prompt first.", { error: true });
           return;
         }
-        const editedPrompt = buildCompiledPrompt();
         if (!promptHook.value.trim() || !promptProblem.value.trim() || !promptSolution.value.trim()) {
-          setStatus("Please complete Hook, Problem, and Solution before generating videos.", { error: true });
+          setStatus("Please complete Hook, Problem, and Solution before generating image.", { error: true });
           return;
         }
 
-        setVideoLoading(true);
-        setStatus("Queued. Starting video generation...");
+        const promptPlan = getPromptPayload();
+        setImageLoading(true);
+        setStatus("Queued. Starting ad campaign image generation...");
         clearResults();
 
         try {
-          const res = await fetch(`${API_BASE}/api/product-marketing/generate-videos`, {
+          const res = await fetch(`${API_BASE}/api/product-marketing/generate-image`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ jobId: activeJobId, prompt: editedPrompt })
+            body: JSON.stringify({ jobId: activeJobId, promptPlan })
           });
           const data = await res.json();
           if (!res.ok) {
-            setStatus(data.error || "Unable to start video generation.", { error: true });
-            setVideoLoading(false);
+            setStatus(data.error || "Unable to start image generation.", { error: true });
+            setImageLoading(false);
             return;
           }
 
@@ -947,7 +1031,7 @@
           pollStatus(activeJobId);
         } catch (err) {
           setStatus("Network error. Please try again.", { error: true });
-          setVideoLoading(false);
+          setImageLoading(false);
         }
       }
 
@@ -957,7 +1041,7 @@
 
       function handleSubmit(event) {
         event.preventDefault();
-        if (isPromptLoading || isVideoLoading) return;
+        if (isPromptLoading || isImageLoading) return;
 
         const normalized = normalizeUrl(input.value);
         if (!normalized.ok) {
@@ -992,7 +1076,10 @@
           node.classList.toggle("active", node === btn);
         });
       });
-      generateVideoBtn.addEventListener("click", submitPromptForVideo);
+      generateVideoBtn.addEventListener("click", () => {
+        setStatus("Campaign video workflow is currently disabled. Use Generate ad campaign image.", { error: true });
+      });
+      generateImageBtn.addEventListener("click", submitPromptForImage);
       downloadJsonBtn.addEventListener("click", downloadPromptJson);
     })();
   </script>

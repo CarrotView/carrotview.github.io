@@ -493,7 +493,7 @@
                 />
                 <div class="input-actions">
                   <span class="url-preview" id="url-preview">Preview: <span>—</span></span>
-                  <button class="btn primary generate" id="generate-btn" type="submit">Generate Prompt</button>
+                  <button class="btn primary generate" id="generate-btn" type="submit">Generate ad campaign</button>
                 </div>
                 <span class="input-hint">We will use your site to tailor clips and positioning.</span>
               </form>
@@ -761,7 +761,7 @@
         isPromptLoading = next;
         input.disabled = next;
         generateBtn.disabled = next;
-        generateBtn.textContent = next ? "Generating Prompt..." : "Generate Prompt";
+        generateBtn.textContent = next ? "Generating ad campaign..." : "Generate ad campaign";
       }
 
       function setImageLoading(next) {

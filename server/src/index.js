@@ -5,6 +5,7 @@ import { z } from "zod";
 import { config } from "./config.js";
 import { createJob, getJob, updateJob } from "./db.js";
 import { jobQueue } from "./queue.js";
+import { getSignedObjectUrl } from "./s3.js";
 
 const app = express();
 
@@ -35,26 +36,7 @@ const generateVideoSchema = z.object({
 
 const generateImageSchema = z.object({
   jobId: z.string().uuid(),
-  promptPlan: z.object({
-    platform: z.string().min(1),
-    audience_targeting: z.object({
-      geography: z.string().min(1),
-      job_title: z.string().min(1),
-      company_category: z.string().min(1)
-    }),
-    message_framework: z.object({
-      hook: z.string().min(1),
-      problem: z.string().min(1),
-      solution: z.string().min(1),
-      cta: z.string().min(1)
-    }),
-    style_controls: z.object({
-      visual_style: z.string().min(1),
-      pacing: z.string().min(1),
-      camera_technique: z.string().min(1),
-      image_technique: z.string().min(1)
-    })
-  })
+  promptPlan: z.any().optional()
 });
 
 app.post("/api/product-marketing/generate-prompt", async (req, res) => {
@@ -105,9 +87,31 @@ app.post("/api/product-marketing/generate-image", async (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
+    const incoming = (body.promptPlan && typeof body.promptPlan === "object") ? body.promptPlan : {};
+    const normalizedPlan = {
+      platform: (incoming.platform || "linkedin"),
+      audience_targeting: {
+        geography: incoming?.audience_targeting?.geography || "United States and Canada",
+        job_title: incoming?.audience_targeting?.job_title || "Product Marketing Managers and Growth Marketers",
+        company_category: incoming?.audience_targeting?.company_category || "B2B SaaS companies"
+      },
+      message_framework: {
+        hook: incoming?.message_framework?.hook || "Still spending too much time creating ad creatives?",
+        problem: incoming?.message_framework?.problem || "Teams lose momentum because campaign assets take too long to produce.",
+        solution: incoming?.message_framework?.solution || "This product uses its features and expertise to create quality campaign assets quickly.",
+        cta: incoming?.message_framework?.cta || "Start your campaign today."
+      },
+      style_controls: {
+        visual_style: incoming?.style_controls?.visual_style || "clean product UI, premium b2b look",
+        pacing: incoming?.style_controls?.pacing || "fast with decisive cuts",
+        camera_technique: incoming?.style_controls?.camera_technique || "steady product hero shots with kinetic overlays",
+        image_technique: incoming?.style_controls?.image_technique || "vector illustration"
+      }
+    };
+
     const nextSummary = {
       ...(job.summary_json || {}),
-      prompt_plan: body.promptPlan
+      prompt_plan: normalizedPlan
     };
     await updateJob(body.jobId, {
       summary_json: nextSummary,
@@ -119,8 +123,15 @@ app.post("/api/product-marketing/generate-image", async (req, res) => {
     console.log(`[api] queued image job ${body.jobId}`);
     return res.json({ jobId: body.jobId });
   } catch (err) {
-    const message = err instanceof z.ZodError ? err.errors[0]?.message : err.message;
-    return res.status(400).json({ error: message || "Invalid request" });
+    if (err instanceof z.ZodError) {
+      const first = err.errors[0];
+      const field = first?.path?.join(".") || "unknown";
+      return res.status(400).json({
+        error: first?.message || "Invalid request",
+        field
+      });
+    }
+    return res.status(400).json({ error: err.message || "Invalid request" });
   }
 });
 
@@ -136,6 +147,14 @@ app.get("/api/product-marketing/status", async (req, res) => {
   }
 
   const generatedAssets = (job.summary_json && job.summary_json.generated_assets) || {};
+  let imageUrl = generatedAssets.image_url || null;
+  if (generatedAssets.image_key) {
+    try {
+      imageUrl = await getSignedObjectUrl(generatedAssets.image_key);
+    } catch (error) {
+      console.error("[api] failed to sign image URL", error);
+    }
+  }
   res.json({
     jobId: job.id,
     status: job.status,
@@ -144,7 +163,7 @@ app.get("/api/product-marketing/status", async (req, res) => {
     generatedPlan: job.summary_json,
     videoAUrl: job.video_a_url,
     videoBUrl: job.video_b_url,
-    imageUrl: generatedAssets.image_url || null,
+    imageUrl,
     imagePromptUsed: generatedAssets.image_prompt || null,
     error: job.error
   });

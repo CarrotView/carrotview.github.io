@@ -1,4 +1,5 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { config } from "./config.js";
 
 export const s3 = new S3Client({
@@ -37,4 +38,12 @@ export async function uploadImage({ key, buffer, contentType = "image/png" }) {
   );
 
   return buildPublicUrl(key);
+}
+
+export async function getSignedObjectUrl(key, expiresIn = config.signedUrlExpiresSeconds) {
+  const command = new GetObjectCommand({
+    Bucket: config.s3Bucket,
+    Key: key
+  });
+  return getSignedUrl(s3, command, { expiresIn });
 }

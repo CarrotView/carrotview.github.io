@@ -151,8 +151,9 @@ const worker = new Worker(
         const image = await generateImage(imagePrompt);
         console.log(`[worker] image generated for ${id}`);
 
+        const imageKey = `product-marketing/${id}/campaign-image.png`;
         const imageUrl = await uploadImage({
-          key: `product-marketing/${id}/campaign-image.png`,
+          key: imageKey,
           buffer: image.buffer,
           contentType: image.contentType
         });
@@ -161,6 +162,7 @@ const worker = new Worker(
           summary_json: {
             ...(dbJob.summary_json || {}),
             generated_assets: {
+              image_key: imageKey,
               image_url: imageUrl,
               image_prompt: imagePrompt
             }

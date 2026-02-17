@@ -31,6 +31,7 @@ export const config = {
   videoSeconds: allowedSeconds.has(parsedSeconds) ? parsedSeconds : 12,
   videoSize: allowedSizes.has(requestedSize) ? requestedSize : "720x1280",
   imageSize: allowedImageSizes.has(requestedImageSize) ? requestedImageSize : "1024x1024",
+  signedUrlExpiresSeconds: Number(process.env.SIGNED_URL_EXPIRES_SECONDS || 3600),
   s3Region: requireEnv("S3_REGION"),
   s3Bucket: requireEnv("S3_BUCKET"),
   s3AccessKeyId: requireEnv("S3_ACCESS_KEY_ID"),

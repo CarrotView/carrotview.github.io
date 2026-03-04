@@ -4,6 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
 
+// File upload configuration
+const UPLOAD_CONFIG = {
+  MAX_FILE_SIZE: 500 * 1024 * 1024, // 500MB
+  ALLOWED_TYPES: ['video/'],
+  UPLOAD_SIMULATION_INTERVAL: 200, // ms
+} as const;
+
 interface UploadedFile {
   id: string;
   name: string;
@@ -25,6 +32,32 @@ const VideoUpload = () => {
     e.preventDefault();
     setIsDragOver(false);
   }, []);
+
+  // File validation helper
+  const validateFile = (file: File): boolean => {
+    const isVideo = file.type.startsWith(UPLOAD_CONFIG.ALLOWED_TYPES[0]);
+    const isValidSize = file.size <= UPLOAD_CONFIG.MAX_FILE_SIZE;
+    
+    if (!isVideo) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload video files only.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (!isValidSize) {
+      toast({
+        title: "File Too Large", 
+        description: "Please upload videos smaller than 500MB.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
+  };
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -53,34 +86,11 @@ const VideoUpload = () => {
           f.id === fileId ? { ...f, progress } : f
         ));
       }
-    }, 200);
+    }, UPLOAD_CONFIG.UPLOAD_SIMULATION_INTERVAL);
   };
 
   const handleFiles = (fileList: FileList) => {
-    const validFiles = Array.from(fileList).filter(file => {
-      const isVideo = file.type.startsWith('video/');
-      const maxSize = 500 * 1024 * 1024; // 500MB
-      
-      if (!isVideo) {
-        toast({
-          title: "Invalid File Type",
-          description: "Please upload video files only.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      if (file.size > maxSize) {
-        toast({
-          title: "File Too Large",
-          description: "Please upload videos smaller than 500MB.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      return true;
-    });
+    const validFiles = Array.from(fileList).filter(validateFile);
 
     const newFiles: UploadedFile[] = validFiles.map(file => ({
       id: Math.random().toString(36).substr(2, 9),

@@ -263,6 +263,164 @@
       border-top: 1px solid rgba(255,255,255,.06);
       margin-top: 26px;
     }
+
+    /* Video Upload Bar Styles */
+    .upload-container {
+      margin: 20px 0;
+      max-width: 100%;
+    }
+
+    .upload-zone {
+      border: 2px dashed rgba(255,255,255,.2);
+      border-radius: var(--radius2);
+      padding: 20px 16px;  /* Reduced from 32px 20px */
+      text-align: center;
+      background: rgba(255,255,255,.03);
+      transition: all .2s ease;
+      cursor: pointer;
+      margin-bottom: 12px;  /* Reduced from 16px */
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: rgba(0,225,255,.6);
+      background: rgba(0,225,255,.05);
+      transform: scale(1.01);
+    }
+
+    .upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;  /* Reduced from 12px */
+    }
+
+    .upload-icon {
+      font-size: 36px;  /* Reduced from 48px */
+      opacity: .8;
+    }
+
+    .upload-text strong {
+      display: block;
+      font-size: 16px;  /* Reduced from 18px */
+      margin-bottom: 6px;  /* Reduced from 8px */
+      color: var(--text);
+    }
+
+    .upload-text p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .upload-browse {
+      color: rgba(0,225,255,1);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .upload-browse:hover {
+      text-decoration: underline;
+    }
+
+    .upload-text small {
+      display: block;
+      margin-top: 4px;  /* Reduced from 8px */
+      color: rgba(255,255,255,.5);
+      font-size: 12px;
+    }
+
+    .upload-files {
+      margin-bottom: 16px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-info strong {
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-info small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .file-remove {
+      background: transparent;
+      border: none;
+      color: rgba(255,95,170,1);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .file-remove:hover {
+      background: rgba(255,95,170,.1);
+    }
+
+    .upload-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .btn:disabled:hover {
+      transform: none;
+      background: rgba(255,255,255,.04);
+    }
+
+    @media (max-width: 640px) {
+      .upload-zone {
+        padding: 24px 16px;
+      }
+      
+      .upload-icon {
+        font-size: 36px;
+      }
+      
+      .upload-text strong {
+        font-size: 16px;
+      }
+      
+      .upload-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .upload-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <!-- Google tag (gtag.js) -->
@@ -319,9 +477,28 @@
               tailored for YouTube Shorts, Reels, and TikTok.
             </p>
 
-            <div class="cta-row" id="get-started">
-              <a class="btn primary" href="#how">See the workflow</a>
-              <a class="btn" href="#features">Explore features</a>
+            <!-- Video Upload Bar -->
+            <div class="upload-container" id="get-started">
+              <div class="upload-zone" id="uploadZone">
+                <div class="upload-content">
+                  <div class="upload-icon">📹</div>
+                  <div class="upload-text">
+                    <strong>Drop your video here</strong>
+                    <p>or <span class="upload-browse" id="browseBtn">browse to upload</span></p>
+                    <small>MP4, AVI, MOV • Max 500MB</small>
+                  </div>
+                </div>
+                <input type="file" id="videoInput" accept="video/*" multiple style="display: none;">
+              </div>
+              
+              <div class="upload-files" id="uploadFiles"></div>
+              
+              <div class="upload-actions">
+                <button class="btn primary" id="analyzeBtn" disabled>
+                  ✨ Analyze Video
+                </button>
+                <a class="btn" href="#features">Learn More</a>
+              </div>
             </div>
 
             <div class="meta-row">
@@ -470,6 +647,127 @@
       document.addEventListener("click", () => close());
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") close();
+      });
+    })();
+
+    // Video Upload Functionality
+    (function() {
+      const uploadZone = document.getElementById('uploadZone');
+      const videoInput = document.getElementById('videoInput');
+      const browseBtn = document.getElementById('browseBtn');
+      const uploadFiles = document.getElementById('uploadFiles');
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      let selectedFiles = [];
+
+      // File size formatter
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+        return Math.round(bytes / 1048576) + ' MB';
+      }
+
+      // Handle file selection
+      function handleFiles(files) {
+        const videoFiles = Array.from(files).filter(file => {
+          if (!file.type.startsWith('video/')) {
+            alert('Please select video files only.');
+            return false;
+          }
+          if (file.size > 500 * 1024 * 1024) {
+            alert('File size must be less than 500MB.');
+            return false;
+          }
+          return true;
+        });
+
+        videoFiles.forEach(file => {
+          if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+            selectedFiles.push(file);
+          }
+        });
+
+        displayFiles();
+        updateAnalyzeButton();
+      }
+
+      // Display selected files
+      function displayFiles() {
+        uploadFiles.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file-item';
+          fileItem.innerHTML = `
+            <div class="file-info">
+              <span style="font-size: 16px;">🎬</span>
+              <div>
+                <strong>${file.name}</strong>
+                <div><small>${formatFileSize(file.size)}</small></div>
+              </div>
+            </div>
+            <button class="file-remove" onclick="removeFile(${index})">Remove</button>
+          `;
+          uploadFiles.appendChild(fileItem);
+        });
+      }
+
+      // Remove file
+      window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        displayFiles();
+        updateAnalyzeButton();
+      };
+
+      // Update analyze button state
+      function updateAnalyzeButton() {
+        analyzeBtn.disabled = selectedFiles.length === 0;
+      }
+
+      // Drag and drop handlers
+      uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+      });
+
+      uploadZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+      });
+
+      uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+      });
+
+      // Click to browse
+      uploadZone.addEventListener('click', () => {
+        videoInput.click();
+      });
+
+      browseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        videoInput.click();
+      });
+
+      // File input change
+      videoInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+      });
+
+      // Analyze button
+      analyzeBtn.addEventListener('click', () => {
+        if (selectedFiles.length > 0) {
+          // Simulate analysis process
+          analyzeBtn.innerHTML = '🔄 Analyzing...';
+          analyzeBtn.disabled = true;
+          
+          setTimeout(() => {
+            alert(`✨ Analysis complete! Found ${Math.floor(Math.random() * 5) + 3} viral moments in your ${selectedFiles.length} video${selectedFiles.length > 1 ? 's' : ''}.`);
+            analyzeBtn.innerHTML = '✨ Analyze Video';
+            analyzeBtn.disabled = false;
+          }, 2000);
+        }
       });
     })();
   </script>

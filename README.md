@@ -29,36 +29,78 @@ This is being done through the GitHub
 
 ## 🛠️ Development Setup
 
-### Prerequisites
-- **Node.js** (v18 or higher) - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-- **Bun** (recommended) or npm for package management
+### Prerequisites & Isolation
+This project uses **local dependency management** - no global installations needed!
 
-### Getting Started
+**Option 1: Using nvm (Recommended for isolation)**
+```sh
+# Install nvm (Windows)
+winget install CoreyButler.NVMforWindows
+# OR on macOS/Linux
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# Use project Node version (reads .nvmrc)
+nvm use
+# OR install specific version
+nvm install 18.19.0 && nvm use 18.19.0
+```
+
+**Option 2: Direct Node.js**
+- **Node.js** v18.19.0+ - [Download](https://nodejs.org/)
+
+### Package Manager
+Choose **one** (we recommend Bun for speed):
+- **Bun** - `npm install -g bun` 
+- **npm** - comes with Node.js
+
+### Getting Started (Isolated Environment)
 
 ```sh
-# 1. Clone the repository
+# 1. Clone & navigate
 git clone https://github.com/carrotview/carrotview.github.io.git
 cd carrotview.github.io
 
-# 2. Install dependencies (using bun - recommended)
-bun install
-# OR with npm
+# 2. Use correct Node version (with nvm)
+nvm use  # reads .nvmrc automatically
+
+# 3. Install dependencies (LOCAL to this project)
+bun install     # creates local node_modules/
+# OR
 npm install
 
-# 3. Start development server
+# 4. Start development (runs on localhost:8080)
 bun dev
-# OR with npm
+# OR  
 npm run dev
-
-# 4. Open your browser to http://localhost:8080
 ```
 
+### Why This Approach Works
+✅ **Dependencies isolated** - stored in local `node_modules/`  
+✅ **No global pollution** - each project has its own deps  
+✅ **Version consistency** - `.nvmrc` ensures same Node version  
+✅ **Lock files** - `bun.lockb` ensures exact dependency versions
+
 ### Available Scripts
-- `bun dev` - Start development server
-- `bun build` - Build for production  
-- `bun build:dev` - Build in development mode
-- `bun lint` - Run ESLint
-- `bun preview` - Preview production build
+- `bun dev` / `npm run dev` - Start development server (http://localhost:8080)
+- `bun build` / `npm run build` - Build for production  
+- `bun build:dev` / `npm run build:dev` - Build in development mode
+- `bun lint` / `npm run lint` - Run ESLint
+- `bun preview` / `npm run preview` - Preview production build locally
+
+### Troubleshooting Isolation Issues
+
+**Problem**: Global package conflicts  
+**Solution**: Use nvm to switch Node versions per project
+
+**Problem**: Different dependency versions  
+**Solution**: Delete `node_modules` and reinstall
+
+```sh
+# Clean slate (when having issues)
+rm -rf node_modules bun.lockb  # or package-lock.json
+nvm use                        # ensure correct Node version  
+bun install                    # reinstall dependencies
+```
 
 ## 📁 Project Structure
 

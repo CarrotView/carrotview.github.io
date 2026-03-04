@@ -56,12 +56,16 @@ Choose **one** (we recommend Bun for speed):
 ### Getting Started (Isolated Environment)
 
 **Quick setup (recommended):**
-```sh
-# Windows
-./setup.bat
+```powershell
+# Windows (PowerShell/Command Prompt)
+.\setup.ps1
 
-# macOS/Linux  
-chmod +x setup.sh && ./setup.sh
+# If you get "execution policy" error:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\setup.ps1
+
+# macOS/Linux (PowerShell Core)  
+pwsh setup.ps1
 ```
 
 **Manual setup:**
@@ -105,11 +109,15 @@ npm run dev
 **Problem**: Different dependency versions  
 **Solution**: Delete `node_modules` and reinstall
 
-```sh
-# Clean slate (when having issues)
-rm -rf node_modules bun.lockb  # or package-lock.json
+```powershell
+# Clean slate (when having issues) - PowerShell
+Remove-Item -Recurse -Force node_modules, bun.lockb  # or package-lock.json
 nvm use                        # ensure correct Node version  
 bun install                    # reinstall dependencies
+
+# Alternative with traditional commands
+rm -rf node_modules bun.lockb
+npm install
 ```
 
 ## 📁 Project Structure

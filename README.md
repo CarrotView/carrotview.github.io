@@ -55,6 +55,16 @@ Choose **one** (we recommend Bun for speed):
 
 ### Getting Started (Isolated Environment)
 
+**Quick setup (recommended):**
+```sh
+# Windows
+./setup.bat
+
+# macOS/Linux  
+chmod +x setup.sh && ./setup.sh
+```
+
+**Manual setup:**
 ```sh
 # 1. Clone & navigate
 git clone https://github.com/carrotview/carrotview.github.io.git

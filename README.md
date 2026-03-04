@@ -27,26 +27,54 @@ CarrotView is an AI-powered video intelligence platform that transforms how busi
 
 This is being done through the GitHub 
 
-**Use your preferred IDE**
+## 🛠️ Development Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in the website.
+### Prerequisites
+- **Node.js** (v18 or higher) - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Bun** (recommended) or npm for package management
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Getting Started
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 1. Clone the repository
+git clone https://github.com/carrotview/carrotview.github.io.git
+cd carrotview.github.io
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Install dependencies (using bun - recommended)
+bun install
+# OR with npm
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Start development server
+bun dev
+# OR with npm
 npm run dev
+
+# 4. Open your browser to http://localhost:8080
+```
+
+### Available Scripts
+- `bun dev` - Start development server
+- `bun build` - Build for production  
+- `bun build:dev` - Build in development mode
+- `bun lint` - Run ESLint
+- `bun preview` - Preview production build
+
+## 📁 Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   ├── Hero.tsx        # Landing page hero section
+│   ├── Features.tsx    # Features showcase
+│   └── ...
+├── pages/              # Route components
+│   ├── Index.tsx       # Homepage
+│   └── NotFound.tsx    # 404 page
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions
+└── assets/             # Static assets
 ```
 
 **Edit a file directly in GitHub**

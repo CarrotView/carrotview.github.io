@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import SimpleVideoUpload from "@/components/SimpleVideoUpload";
 import heroImage from "@/assets/hero-image.jpg";
 
 // Key statistics for the hero section
@@ -46,17 +45,6 @@ const Hero = () => {
               <Button size="lg" variant="outline" className="border-2 hover:bg-muted">
                 Watch Demo
               </Button>
-            </div>
-
-            {/* Video Upload Section */}
-            <div className="mt-12 p-6 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-semibold mb-2">Try It Now</h3>
-                <p className="text-muted-foreground">
-                  Upload your video and see CarrotView's AI analysis in action
-                </p>
-              </div>
-              <SimpleVideoUpload />
             </div>
             
             <div className="flex items-center gap-8 pt-4">

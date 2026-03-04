@@ -1,7 +1,8 @@
 import { Shield, Clock, Users, FileCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const features = [
+// Feature data - easy to modify and maintain
+const FEATURES = [
   {
     icon: Shield,
     title: "Safety & Compliance",
@@ -9,7 +10,7 @@ const features = [
   },
   {
     icon: Clock,
-    title: "Time Intelligence",
+    title: "Time Intelligence", 
     description: "Save countless hours by letting AI analyze your video footage instantly. Get insights in seconds, not days.",
   },
   {
@@ -22,7 +23,7 @@ const features = [
     title: "Conflict Resolution",
     description: "Quickly review and resolve disputes with AI-powered video analysis that identifies key moments and provides objective evidence.",
   },
-];
+] as const;
 
 const Features = () => {
   return (
@@ -39,7 +40,7 @@ const Features = () => {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => {
+          {FEATURES.map((feature, index) => {
             const Icon = feature.icon;
             return (
               <Card 

@@ -1,7 +1,15 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import SimpleVideoUpload from "@/components/SimpleVideoUpload";
 import heroImage from "@/assets/hero-image.jpg";
+
+// Key statistics for the hero section
+const heroStats = [
+  { value: "95%", label: "Time Saved" },
+  { value: "24/7", label: "Monitoring" }, 
+  { value: "100%", label: "Accuracy" },
+] as const;
 
 const Hero = () => {
   return (
@@ -52,20 +60,17 @@ const Hero = () => {
             </div>
             
             <div className="flex items-center gap-8 pt-4">
-              <div>
-                <div className="text-3xl font-bold text-foreground">95%</div>
-                <div className="text-sm text-muted-foreground">Time Saved</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div>
-                <div className="text-3xl font-bold text-foreground">24/7</div>
-                <div className="text-sm text-muted-foreground">Monitoring</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div>
-                <div className="text-3xl font-bold text-foreground">100%</div>
-                <div className="text-sm text-muted-foreground">Accuracy</div>
-              </div>
+              {heroStats.map((stat, index) => (
+                <React.Fragment key={stat.label}>
+                  <div>
+                    <div className="text-3xl font-bold text-foreground">{stat.value}</div>
+                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  </div>
+                  {index < heroStats.length - 1 && (
+                    <div className="h-12 w-px bg-border" />
+                  )}
+                </React.Fragment>
+              ))}
             </div>
           </div>
           

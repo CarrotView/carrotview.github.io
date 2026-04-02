@@ -49,6 +49,10 @@
       display:flex; align-items:center; justify-content:space-between;
       padding: 16px 0; gap: 12px;
     }
+    .nav-left{
+      display:flex; align-items:center; gap: 18px;
+      min-width: 0;
+    }
     .brand{ display:flex; align-items:center; gap: 10px; font-weight: 900; letter-spacing: .2px; }
     .logo{
       width: 34px; height: 34px; border-radius: 10px;
@@ -281,28 +285,29 @@
   <header>
     <div class="container">
       <div class="nav">
-        <a class="brand" href="#">
-          <span class="logo" aria-hidden="true"></span>
-          <span>CarrotView</span>
-        </a>
+        <div class="nav-left">
+          <a class="brand" href="#">
+            <span class="logo" aria-hidden="true"></span>
+            <span>CarrotView</span>
+          </a>
 
-        <ul class="nav-links">
-          <li class="dropdown">
-            <button class="dropbtn" type="button" aria-haspopup="true" aria-expanded="false">
-              Features <span class="caret" aria-hidden="true"></span>
-            </button>
-            <div class="menu" role="menu" aria-label="Features menu">
-              <small>Explore</small>
-              <a href="#features-detection" role="menuitem">Positioning and messaging</a>
-              <a href="#features-formatting" role="menuitem">Campaign planning</a>
-              <a href="#features-captions" role="menuitem">Creative generation</a>
-              <a href="/features/product_marketing" role="menuitem">Product marketing</a>
-              <a href="/features/ai_product_marketing" role="menuitem">AI product marketing</a>
-            </div>
-          </li>
+          <ul class="nav-links">
+            <li class="dropdown">
+              <button class="dropbtn" type="button" aria-haspopup="true" aria-expanded="false">
+                Features <span class="caret" aria-hidden="true"></span>
+              </button>
+              <div class="menu" role="menu" aria-label="Features menu">
+                <small>Explore</small>
+                <a href="#features-detection" role="menuitem">Positioning and messaging</a>
+                <a href="#features-formatting" role="menuitem">Campaign planning</a>
+                <a href="#features-captions" role="menuitem">Creative generation</a>
+                <a href="/features/ai_product_marketing" role="menuitem">AI product marketing</a>
+              </div>
+            </li>
 
-          <li><a href="#how">How it works</a></li>
-        </ul>
+            <li><a href="#how">How it works</a></li>
+          </ul>
+        </div>
 
         <div class="nav-cta">
           <a class="btn primary" href="#get-started">Get started</a>

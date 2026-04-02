@@ -1,8 +1,8 @@
 import * as cheerio from "cheerio";
 import { GoogleGenAI } from "@google/genai";
 
-const DEFAULT_MODEL = process.env.GEMINI_TEXT_MODEL || "gemini-2.5-flash";
-const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-2.0-flash-preview-image-generation";
+const DEFAULT_MODEL = process.env.GEMINI_TEXT_MODEL || "gemini-3-flash-preview";
+const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
 
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
